@@ -35,6 +35,7 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
 
       - name: Install dependencies
         run: cd backend && npm ci 
@@ -42,6 +43,7 @@ jobs:
       - name: Run tests
         run: cd backend && npm test
         env:
+          NODE_ENV: test
           DB_HOST: localhost
           DB_PORT: 5432
           DB_NAME: tododb
