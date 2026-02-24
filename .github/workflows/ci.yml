@@ -1,103 +1,71 @@
-name: CI/CD Pipeline
+name: CI Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main ]
 
 jobs:
-
-  # Build and Test with PostgreSQL
-
   build-and-test:
+    name: Build & Test
     runs-on: ubuntu-latest
 
+    # Khởi tạo Database tạm thời để chạy test
     services:
-      postgres:
+      db:
         image: postgres:14-alpine
         env:
-          POSTGRES_USER: user
-          POSTGRES_PASSWORD: password
-          POSTGRES_DB: myapp
+          POSTGRES_USER: myuser
+          POSTGRES_PASSWORD: mypass
+          POSTGRES_DB: mydatabase
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U user -d myapp"
+          --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3
         with:
           node-version: '18'
+          cache: 'npm'
 
-      - name: Install backend dependencies
-        working-directory: ./backend
-        run: npm ci
-
-      - name: Initialize database schema
-        run: PGPASSWORD=password psql -h localhost -U user -d myapp -f database/database.sql
+      - name: Install dependencies
+        # Di chuyển vào thư mục backend và cài đặt thư viện
+        run: cd backend && npm ci 
 
       - name: Run tests
-        working-directory: ./backend
+        # Chạy test với biến môi trường kết nối vào DB bên trên
+        run: cd backend && npm test
         env:
           DB_HOST: localhost
-          DB_PORT: 5432
-          DB_NAME: myapp
-          DB_USER: user
-          DB_PASSWORD: password
-          PORT: 5000
-        run: npm test
+          DB_USER: myuser
+          DB_PASSWORD: mypass
+          DB_NAME: mydatabase
 
-  # Build and Push Docker Image
-
-  docker:
-    runs-on: ubuntu-latest
-    needs: build-and-test
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_TOKEN }}
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
+      - name: Build and push Backend image
+        uses: docker/build-push-action@v4
         with:
-          context: .
+          context: ./backend
           push: true
-          tags: |
-            ${{ secrets.DOCKER_USERNAME }}/devops-project:latest
-            ${{ secrets.DOCKER_USERNAME }}/devops-project:${{ github.sha }}
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/todo-backend:latest
 
-  # Deploy to Production via SSH
-  
-  deploy:
-    runs-on: ubuntu-latest
-    needs: docker
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-
-    steps:
-      - name: Deploy to server via SSH
-        uses: appleboy/ssh-action@v1
+      - name: Build and push Frontend image
+        uses: docker/build-push-action@v4
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 2222
-          script: |
-            cd /opt/devops-project
-            docker compose pull
-            docker compose up -d --force-recreate
-            docker image prune -f
+          context: ./frontend
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/todo-frontend:latest
