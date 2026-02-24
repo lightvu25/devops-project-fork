@@ -13,7 +13,7 @@ const pool = new Pool({
    user: process.env.DB_USER || 'postgres',
    host: process.env.DB_HOST || 'localhost',
    database: process.env.DB_NAME || 'tododb',
-   password: process.env.DB_PASSWORD || 'wrongpassword',
+   password: process.env.DB_PASSWORD || 'postgres',
    port: process.env.DB_PORT || 5432,
 });
 
@@ -40,6 +40,9 @@ app.post('/api/todos', async (req, res) => {
       // STUDENT FIX: Add validation here!
       // Hint: Check if title is empty or undefined
       // Return 400 status with error message if invalid
+      if (!title || title.trim() === '') {
+         return res.status(400).json({ error: 'Title is required' });
+      }
 
       const result = await pool.query(
          'INSERT INTO todos(title, completed) VALUES($1, $2) RETURNING *',
