@@ -8,7 +8,7 @@ on:
 
 jobs:
 
-  # Job 1: Build and Test with PostgreSQL
+  # Build and Test with PostgreSQL
 
   build-and-test:
     runs-on: ubuntu-latest
@@ -55,7 +55,7 @@ jobs:
           PORT: 5000
         run: npm test
 
-  # Job 2: Build and Push Docker Image
+  # Build and Push Docker Image
 
   docker:
     runs-on: ubuntu-latest
@@ -81,7 +81,7 @@ jobs:
             ${{ secrets.DOCKER_USERNAME }}/devops-project:latest
             ${{ secrets.DOCKER_USERNAME }}/devops-project:${{ github.sha }}
 
-  # Job 3: Deploy to Production via SSH
+  # Deploy to Production via SSH
   
   deploy:
     runs-on: ubuntu-latest
@@ -95,6 +95,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 2222
           script: |
             cd /opt/devops-project
             docker compose pull
