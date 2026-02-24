@@ -40,21 +40,46 @@
 version: '3.8'
 
 services:
-  # STUDENT TODO: Define frontend service
   frontend:
     build: ./frontend
-    # TODO: Add ports, depends_on
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      - REACT_APP_API_URL=http://localhost:5000
 
-  # STUDENT TODO: Define backend service
   backend:
     build: ./backend
-    # TODO: Add ports, environment, depends_on, healthcheck
+    ports:
+      - "5000:5000"
+    environment:
+      - DATABASE_URL=postgres://user:password@postgres:5432/myapp
+      - PORT=5000
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:5000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
-  # STUDENT TODO: Define postgres service
   postgres:
     image: postgres:15-alpine
-    # TODO: Add environment, ports, volumes, healthcheck
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=myapp
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d myapp"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-# STUDENT TODO: Define named volumes
 volumes:
-  postgres_data:
+  postgres_data: 
