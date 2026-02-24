@@ -5,6 +5,7 @@ npm-debug.log
 *.md
 .env
 .env.*
-build
+coverage
+.nyc_output
 Dockerfile
 .dockerignore
