@@ -47,4 +47,4 @@ services:
 
 # Named volumes for data persistence
 volumes:
-  postgres_data:
+  postgres_data: 
