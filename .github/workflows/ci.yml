@@ -91,17 +91,20 @@ jobs:
       - name: Deploy to Local Production via Cloudflare TCP Tunnel
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          SSH_HOST: ssh.quang205.dpdns.org
+          SSH_HOST: ${{ secrets.SSH_HOST }}
           SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
         run: |
           mkdir -p ~/.ssh
+
           cat <<< "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           
-          echo "Host ssh.quang205.dpdns.org" > ~/.ssh/config
+          echo "Host $SSH_HOST" > ~/.ssh/config
           echo "  ProxyCommand cloudflared access ssh --hostname %h" >> ~/.ssh/config
           echo "  StrictHostKeyChecking no" >> ~/.ssh/config
+          chmod 600 ~/.ssh/config
 
-          curl -I -s https://ssh.quang205.dpdns.org
+          curl -I -s https://$SSH_HOST
           
-          ssh -i ~/.ssh/id_rsa "$SSH_USERNAME" @$SSH_HOST "cd ~/devops-project-fork && sudo docker-compose pull && sudo docker-compose up -d"
+          ssh -i ~/.ssh/id_rsa "$SSH_USERNAME"@$SSH_HOST "cd /mnt/d/Devops/devops-project-fork && sudo docker compose pull && sudo docker compose up -d"
+          
