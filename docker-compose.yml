@@ -1,17 +1,16 @@
 services:
-  # Frontend service
-  frontend:
+  # Nginx reverse proxy (serves frontend + proxies API)
+  nginx:
     build: ./frontend
     ports:
-      - "3000:3000"
+      - "3000:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
 
-  # Backend service
+  # Backend service (internal only - not exposed to host)
   backend:
     build: ./backend
-    ports:
-      - "8080:8080"
     environment:
       - DB_HOST=postgres
       - DB_PORT=5432

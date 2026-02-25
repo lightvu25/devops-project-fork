@@ -16,18 +16,15 @@ COPY . .
 RUN npm run build
 
 # Stage 2: Production
-FROM node:18-alpine
+FROM nginx:alpine
 
-WORKDIR /app
+RUN rm /etc/nginx/conf.d/default.conf
 
-# Install serve globally to serve static files
-RUN npm install -g serve
+COPY nginx/default.conf /etc/nginx/conf.d/default.conf
 
-# Copy only the build folder from builder stage
-COPY --from=builder /app/build ./build
+COPY --from=builder /app/build /usr/share/nginx/html
 
-# Expose port 3000
-EXPOSE 3000
+EXPOSE 80
 
-# Serve the static files
-CMD ["serve", "-s", "build", "-l", "3000"]
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]
