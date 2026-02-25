@@ -101,5 +101,7 @@ jobs:
           echo "Host ssh.quang205.dpdns.org" > ~/.ssh/config
           echo "  ProxyCommand cloudflared access ssh --hostname %h" >> ~/.ssh/config
           echo "  StrictHostKeyChecking no" >> ~/.ssh/config
+
+          curl -I -s https://ssh.quang205.dpdns.org
           
           ssh -i ~/.ssh/id_rsa $SSH_USERNAME@$SSH_HOST "cmd.exe /c \"cd /d D:\Devops\devops-project-fork && git pull origin main && docker compose pull && docker compose up -d --build\""
