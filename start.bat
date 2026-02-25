@@ -10,7 +10,7 @@ wsl -d Ubuntu -u quang -e bash -c "cd ~/devops-project-fork && git pull origin m
 
 echo.
 echo 3. Starting Todo (Frontend + Backend + DB)...
-wsl -d Ubuntu -u quang -e bash -c "cd ~/devops-project-fork && docker compose pull && docker compose up -d"
+wsl -d Ubuntu -u quang -e bash -c "cd ~/devops-project-fork && docker compose pull && docker compose up -d --build"
 
 echo.
 echo SERVER ONLINE
