@@ -104,4 +104,4 @@ jobs:
 
           curl -I -s https://ssh.quang205.dpdns.org
           
-          ssh -i ~/.ssh/id_rsa $SSH_USERNAME@$SSH_HOST "cmd.exe /c \"cd /d D:\Devops\devops-project-fork && git pull origin main && docker compose pull && docker compose up -d --build\""
+          ssh -i ~/.ssh/id_rsa "$SSH_USERNAME"@$SSH_HOST "cd D:/Devops/devops-project-fork && git pull origin main && docker compose pull && docker compose up -d --build"
