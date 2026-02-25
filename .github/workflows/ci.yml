@@ -40,6 +40,9 @@ jobs:
       - name: Install dependencies
         run: cd backend && npm ci 
 
+      - name: Initialize database
+        run: PGPASSWORD=postgres psql -h localhost -U postgres -d tododb -f database/database.sql
+
       - name: Run tests
         run: cd backend && npm test
         env:
@@ -93,6 +96,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           proxy_command: cloudflared access ssh --hostname %h
           script: |
-            cd /home/devops-project-fork
+            cd ~/devops-project-fork
+            git pull origin main
             docker compose pull
-            docker compose up -d --build
+            docker compose up -d
