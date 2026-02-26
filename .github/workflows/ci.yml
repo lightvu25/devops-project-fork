@@ -106,5 +106,5 @@ jobs:
 
           curl -I -s https://$SSH_HOST
           
-          ssh -i ~/.ssh/id_rsa "$SSH_USERNAME"@$SSH_HOST "cd /mnt/d/Devops/devops-project-fork && sudo docker compose pull && sudo docker compose up -d"
+          ssh -i ~/.ssh/id_rsa "$SSH_USERNAME"@$SSH_HOST "cd /mnt/d/Devops/devops-project-fork && git pull origin main && sudo docker compose pull && sudo docker compose up -d"
           
