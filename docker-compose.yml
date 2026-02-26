@@ -44,6 +44,16 @@ services:
       timeout: 5s
       retries: 5
 
+  # Cloudflare Tunnel Service
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    restart: always
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=${CF_TUNNEL_TOKEN}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
 # Named volumes for data persistence
 volumes:
   postgres_data:
